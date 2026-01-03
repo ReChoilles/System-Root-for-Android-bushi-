@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>System Interface</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* M3 Tonal Palette - Balanced Saturation */
+            --primary: #0061a4;
+            --on-primary: #ffffff;
+            --primary-container: #d1e4ff;
+            --on-primary-container: #001d36;
+            --surface: #fdfcff;
+            --on-surface: #1a1c1e;
+            --surface-variant: #dfe3eb;
+            --on-surface-variant: #43474e;
+            --outline: #73777f;
+
+            /* M3 Log Colors (Muted but Rich) */
+            --log-blue: #7ca8ff;   /* Info */
+            --log-purple: #c7bfff; /* Process */
+            --log-green: #81c784;  /* Success */
+            --log-yellow: #e6c46a; /* Warn */
+            --log-gray: #90a4ae;   /* Debug */
+        }
+
+        [data-theme="dark"] {
+            --primary: #9ecaff;
+            --on-primary: #003258;
+            --primary-container: #00497d;
+            --on-primary-container: #d1e4ff;
+            --surface: #1a1c1e;
+            --on-surface: #e2e2e6;
+            --surface-variant: #43474e;
+            --on-surface-variant: #c3c7cf;
+        }
+
+        html { font-size: 16px; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--surface);
+            color: var(--on-surface);
+            font-family: 'Google Sans', sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.4s ease;
+            overflow: hidden;
+        }
+
+        .top-app-bar {
+            height: 64px;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin-top: env(safe-area-inset-top);
+        }
+
+        .app-container {
+            flex: 1;
+            padding: 0 24px;
+            max-width: 480px;
+            margin: 0 auto;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-section { text-align: left; margin: 16px 0 32px 0; }
+        .header-icon { font-size: 48px; color: var(--primary); margin-bottom: 16px; }
+        .title { font-size: 28px; font-weight: 400; margin: 0; }
+        .hint-text {
+            font-size: 14px;
+            color: var(--on-surface-variant);
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+
+        /* Selection List with Offset Animation */
+        .selection-list { display: flex; flex-direction: column; gap: 12px; }
+        
+        .list-item {
+            display: flex;
+            align-items: center;
+            padding: 18px 24px;
+            border-radius: 24px;
+            background: var(--surface-variant);
+            cursor: pointer;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                        background-color 0.3s ease, 
+                        color 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 选中时的偏移效果 */
+        .list-item.selected {
+            background: var(--primary-container);
+            color: var(--on-primary-container);
+            transform: translateX(12px); /* 向右偏移 */
+        }
+
+        .list-item i { margin-right: 16px; transition: color 0.3s; }
+        .list-item.selected i { color: var(--primary); }
+        .list-item-text { font-weight: 500; font-size: 16px; }
+
+        /* Professional Log Window */
+        .log-window {
+            background: #121418;
+            color: #cfd8dc;
+            border-radius: 28px;
+            padding: 20px;
+            height: 280px;
+            overflow-y: auto;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 11px;
+            display: none;
+            margin-top: 12px;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.4);
+            border: 1px solid var(--surface-variant);
+        }
+        .log-line { margin-bottom: 4px; line-height: 1.6; border-left: 2px solid #333; padding-left: 10px; }
+        
+        /* Muted Rich Colors */
+        .log-blue { color: var(--log-blue); }
+        .log-purple { color: var(--log-purple); }
+        .log-green { color: var(--log-green); }
+        .log-yellow { color: var(--log-yellow); }
+        .log-gray { color: var(--log-gray); }
+
+        .progress-line {
+            height: 4px;
+            background: var(--surface-variant);
+            border-radius: 2px;
+            margin: 24px 0;
+            overflow: hidden;
+            display: none;
+        }
+        .progress-fill { height: 100%; width: 0; background: var(--primary); transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        /* Fixed Ripple Algorithm */
+        .ripple {
+            position: absolute;
+            background: rgba(var(--ripple-color, 255, 255, 255), 0.25);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple-anim 0.6s linear;
+            pointer-events: none;
+        }
+        @keyframes ripple-anim { to { transform: scale(4); opacity: 0; } }
+
+        .footer { padding: 24px 24px calc(24px + env(safe-area-inset-bottom)) 24px; }
+        .main-btn {
+            width: 100%; height: 56px; border-radius: 28px;
+            background-color: var(--primary); color: var(--on-primary);
+            border: none; font-size: 16px; font-weight: 500; cursor: pointer;
+        }
+        .icon-btn {
+            width: 48px; height: 48px; border-radius: 24px;
+            display: flex; align-items: center; justify-content: center;
+            background: transparent; border: none; color: var(--on-surface); cursor: pointer;
+            position: relative; overflow: visible; /* 为了让水波纹在圆圈内完美显示 */
+        }
+    </style>
+</head>
+<body>
+
+<div class="top-app-bar">
+    <button class="icon-btn" onclick="toggleTheme(event)">
+        <span class="material-icons-sharp" id="theme-icon">dark_mode</span>
+    </button>
+</div>
+
+<div class="app-container">
+    <div class="header-section">
+        <i class="material-icons-sharp header-icon">fingerprint</i>
+        <h1 class="title">System Root</h1>
+        <p class="hint-text" id="hint">Select a framework to escalate system privileges.</p>
+    </div>
+
+    <div id="ui-selector">
+        <div class="selection-list">
+            <div class="list-item selected" onclick="select(this, 'Magisk v27.0')">
+                <i class="material-icons-sharp">auto_awesome</i>
+                <span class="list-item-text">Magisk (Standard)</span>
+            </div>
+            <div class="list-item" onclick="select(this, 'KernelSU')">
+                <i class="material-icons-sharp">memory</i>
+                <span class="list-item-text">KernelSU (GKI)</span>
+            </div>
+            <div class="list-item" onclick="select(this, 'APatch')">
+                <i class="material-icons-sharp">settings_input_component</i>
+                <span class="list-item-text">APatch</span>
+            </div>
+            <div class="list-item" onclick="select(this, 'SukiSU Ultra')">
+                <i class="material-icons-sharp">bolt</i>
+                <span class="list-item-text">SukiSU Ultra</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="progress-line" id="p-box"><div class="progress-fill" id="p-bar"></div></div>
+    <div class="log-window" id="log-window"></div>
+</div>
+
+<div class="footer">
+    <button class="main-btn" id="action-btn" onclick="execute(event)">INITIATE FLASHING</button>
+</div>
+
+<script>
+    // 自动检测设备和系统
+    function getDevice() {
+        const ua = navigator.userAgent;
+        let model = "Generic Device";
+        let ver = "14.0";
+        if (/Android/i.test(ua)) {
+            const m = ua.match(/Android\s([0-9\.]+);\s([^;]+)\sBuild/);
+            if (m) { ver = m[1]; model = m[2]; }
+        }
+        return { model, ver };
+    }
+
+    // 通用水波纹（修复图标偏移）
+    function applyRipple(e, isIcon = false) {
+        const btn = e.currentTarget;
+        const ripple = document.createElement("span");
+        const rect = btn.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        
+        ripple.style.width = ripple.style.height = `${size}px`;
+        
+        if (isIcon) {
+            ripple.style.left = `0px`;
+            ripple.style.top = `0px`;
+        } else {
+            ripple.style.left = `${e.clientX - rect.left - size/2}px`;
+            ripple.style.top = `${e.clientY - rect.top - size/2}px`;
+        }
+        
+        ripple.className = "ripple";
+        btn.appendChild(ripple);
+        setTimeout(() => ripple.remove(), 600);
+    }
+
+    function toggleTheme(e) {
+        applyRipple(e, true);
+        const b = document.body;
+        const isDark = b.getAttribute('data-theme') === 'dark';
+        b.setAttribute('data-theme', isDark ? '' : 'dark');
+        document.getElementById('theme-icon').innerText = isDark ? 'dark_mode' : 'light_mode';
+    }
+
+    let selectedPlan = "Magisk v27.0";
+    function select(el, name) {
+        // 水波纹效果
+        const mockEvent = { currentTarget: el, clientX: event.clientX, clientY: event.clientY };
+        applyRipple(mockEvent);
+
+        document.querySelectorAll('.list-item').forEach(i => i.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedPlan = name;
+    }
+
+    async function execute(e) {
+        applyRipple(e);
+        const btn = document.getElementById('action-btn');
+        const logWin = document.getElementById('log-window');
+        const pBox = document.getElementById('p-box');
+        const pBar = document.getElementById('p-bar');
+        const hint = document.getElementById('hint');
+        const device = getDevice();
+
+        document.getElementById('ui-selector').style.display = 'none';
+        logWin.style.display = 'block';
+        pBox.style.display = 'block';
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+
+        const sequence = [
+            { t: `[INIT] Handshaking with device...`, c: "log-gray", d: 800, h: "Checking hardware state..." },
+            { t: `[SYSTEM] Model: ${device.model}`, c: "log-blue", d: 500 },
+            { t: `[SYSTEM] OS Version: Android ${device.ver}`, c: "log-blue", d: 400 },
+            { t: `[CORE] Downloading ${selectedPlan} components...`, d: 2000, h: "Synchronizing remote assets..." },
+            { t: "[SECURITY] Integrity check: SHA-256 verified", c: "log-green", d: 800 },
+            { t: "[WARN] Verifying Bootloader partition...", c: "log-yellow", d: 1200, h: "Authenticating signatures..." },
+            { t: "[EXEC] Exploiting BL security layer...", d: 6000, h: "Unlocking Bootloader (Critical Stage)..." },
+            { t: "[SUCCESS] Security layer bypassed", c: "log-green", d: 1000 },
+            { t: "[IMG] Reading boot partition to memory...", c: "log-purple", d: 2200, h: "Extracting kernel image..." },
+            { t: "[PATCH] Injecting SU-Daemon & Init-Hooks...", c: "log-purple", d: 3500, h: "Applying system-less patches..." },
+            { t: "[FLASH] Re-writing Partition A (boot_a)...", d: 4500, h: "Writing modified partitions..." },
+            { t: "[FLASH] Re-writing Partition B (boot_b)...", d: 4200 },
+            { t: "[DONE] Clearning temporary mount points...", c: "log-gray", d: 1500, h: "Finalizing..." },
+            { t: `[FINISHED] ${selectedPlan} is now active.`, c: "log-green", d: 500 }
+        ];
+
+        for (let i = 0; i < sequence.length; i++) {
+            const step = sequence[i];
+            if (step.h) hint.innerText = step.h;
+
+            const line = document.createElement('div');
+            line.className = `log-line ${step.c || ''}`;
+            line.innerText = `>> ${step.t}`;
+            logWin.appendChild(line);
+            logWin.scrollTop = logWin.scrollHeight;
+
+            pBar.style.width = `${((i + 1) / sequence.length) * 100}%`;
+            await new Promise(r => setTimeout(r, step.d + (Math.random() * 300)));
+        }
+
+        hint.innerText = "Elevation complete. System reboot required.";
+        btn.disabled = false; btn.style.opacity = '1';
+        btn.innerText = "REBOOT DEVICE";
+        btn.onclick = () => location.reload();
+    }
+</script>
+
+</body>
+</html>
