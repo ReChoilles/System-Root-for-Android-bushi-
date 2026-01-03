@@ -7,7 +7,7 @@ System Root for Android(bushi)是一个基于HTML编写的模拟体验一键Root
 
 <table>
   <tr>
-    <td><img alt="" src="/Screenshot_First"></td>
-    <td><img alt="" src="/Screenshot_Second"></td>
+    <td><img alt="" src="/Screenshot_First.jpg"></td>
+    <td><img alt="" src="/Screenshot_Second.jpg"></td>
   <tr>
 </table>
