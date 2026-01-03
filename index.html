@@ -1,14 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>System Interface</title>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <title>SystemRoot - Version 1.00.4</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* M3 Tonal Palette - Balanced Saturation */
             --primary: #0061a4;
             --on-primary: #ffffff;
             --primary-container: #d1e4ff;
@@ -18,17 +17,12 @@
             --surface-variant: #dfe3eb;
             --on-surface-variant: #43474e;
             --outline: #73777f;
-
-            /* M3 Log Colors (Muted but Rich) */
-            --log-blue: #7ca8ff;   /* Info */
-            --log-purple: #c7bfff; /* Process */
-            --log-green: #81c784;  /* Success */
-            --log-yellow: #e6c46a; /* Warn */
-            --log-gray: #90a4ae;   /* Debug */
+            /* Log 文字颜色变量 */
+            --log-blue: #7ca8ff; --log-purple: #c7bfff; --log-green: #81c784; --log-yellow: #e6c46a; --log-gray: #90a4ae;
         }
 
         [data-theme="dark"] {
-            --primary: #9ecaff;
+            --primary: #d1e4ff;
             --on-primary: #003258;
             --primary-container: #00497d;
             --on-primary-container: #d1e4ff;
@@ -38,168 +32,106 @@
             --on-surface-variant: #c3c7cf;
         }
 
-        html { font-size: 16px; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-        body {
-            margin: 0; padding: 0;
-            background-color: var(--surface);
-            color: var(--on-surface);
-            font-family: 'Google Sans', sans-serif;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            transition: background-color 0.4s ease;
-            overflow: hidden;
+        
+        body { 
+            margin: 0; background: var(--surface); color: var(--on-surface); 
+            /* 统一修改字体为 Roboto */
+            font-family: 'Roboto', 'PingFang SC', sans-serif; 
+            font-weight: 700; height: 100vh; display: flex; flex-direction: column; 
+            overflow: hidden; transition: 0.4s; 
         }
 
-        .top-app-bar {
-            height: 64px;
-            padding: 0 16px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            margin-top: env(safe-area-inset-top);
-        }
+        .top-bar { height: 64px; padding: 0 16px; display: flex; align-items: center; justify-content: flex-end; margin-top: env(safe-area-inset-top); }
 
-        .app-container {
-            flex: 1;
-            padding: 0 24px;
-            max-width: 480px;
-            margin: 0 auto;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-        }
+        .app-container { flex: 1; padding: 0 24px; max-width: 500px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; }
+        .header-section { margin: 16px 0 32px; }
+        /* 使用 Round 版本的圆角图标 */
+        .header-icon { font-size: 56px; color: var(--primary); margin-bottom: 20px; }
+        .title { font-size: 32px; font-weight: 700; margin: 0; letter-spacing: -0.5px; }
+        .hint-text { font-size: 15px; color: var(--on-surface-variant); margin-top: 10px; min-height: 22px; }
 
-        .header-section { text-align: left; margin: 16px 0 32px 0; }
-        .header-icon { font-size: 48px; color: var(--primary); margin-bottom: 16px; }
-        .title { font-size: 28px; font-weight: 400; margin: 0; }
-        .hint-text {
-            font-size: 14px;
-            color: var(--on-surface-variant);
-            margin-top: 8px;
-            line-height: 1.5;
-        }
-
-        /* Selection List with Offset Animation */
         .selection-list { display: flex; flex-direction: column; gap: 12px; }
-        
-        .list-item {
-            display: flex;
-            align-items: center;
-            padding: 18px 24px;
-            border-radius: 24px;
-            background: var(--surface-variant);
-            cursor: pointer;
-            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), 
-                        background-color 0.3s ease, 
-                        color 0.3s ease;
-            position: relative;
-            overflow: hidden;
+        .list-item { 
+            display: flex; align-items: center; padding: 22px 24px; border-radius: 28px; 
+            background: var(--surface-variant); cursor: pointer; 
+            transition: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); 
+            position: relative; overflow: hidden; 
         }
-        
-        /* 选中时的偏移效果 */
-        .list-item.selected {
-            background: var(--primary-container);
-            color: var(--on-primary-container);
-            transform: translateX(12px); /* 向右偏移 */
+        .list-item.selected { 
+            background: var(--primary-container); color: var(--on-primary-container); 
+            transform: translateX(12px); 
         }
+        .list-item i { margin-right: 16px; color: var(--primary); font-size: 24px; }
 
-        .list-item i { margin-right: 16px; transition: color 0.3s; }
-        .list-item.selected i { color: var(--primary); }
-        .list-item-text { font-weight: 500; font-size: 16px; }
+        .settings-panel { position: fixed; inset: 0; background: var(--surface); z-index: 1000; display: none; flex-direction: column; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.2, 0, 0, 1); }
+        .settings-panel.show { display: flex; transform: translateY(0); }
+        .settings-header { height: 64px; padding: 0 16px; display: flex; align-items: center; gap: 16px; font-weight: 700; font-size: 20px; }
+        .settings-content { flex: 1; overflow-y: auto; padding: 12px 16px; }
+        .setting-group { background: var(--surface-variant); border-radius: 28px; overflow: hidden; margin-bottom: 16px; }
+        .setting-row { display: flex; align-items: center; padding: 20px; cursor: pointer; position: relative; overflow: hidden; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .setting-row:last-child { border-bottom: none; }
+        .setting-info { flex: 1; pointer-events: none; }
+        .setting-title { font-size: 16px; font-weight: 700; }
+        .setting-desc { font-size: 13px; opacity: 0.7; margin-top: 4px; }
+        .badge { background: var(--primary); color: var(--on-primary); padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; }
 
-        /* Professional Log Window */
-        .log-window {
-            background: #121418;
-            color: #cfd8dc;
-            border-radius: 28px;
-            padding: 20px;
-            height: 280px;
-            overflow-y: auto;
-            font-family: 'Roboto Mono', monospace;
-            font-size: 11px;
-            display: none;
-            margin-top: 12px;
-            box-shadow: inset 0 2px 8px rgba(0,0,0,0.4);
-            border: 1px solid var(--surface-variant);
+        /* 终端 Log 颜色样式 */
+        .log-window { 
+            background: #0b0e12; color: #cfd8dc; border-radius: 24px; padding: 20px; 
+            height: 280px; overflow-y: auto; 
+            /* 修改为 Roboto Mono 确保等宽风格 */
+            font-family: 'Roboto Mono', monospace; 
+            font-size: 11px; display: none; margin-top: 16px; border: 1px solid var(--surface-variant); 
         }
-        .log-line { margin-bottom: 4px; line-height: 1.6; border-left: 2px solid #333; padding-left: 10px; }
-        
-        /* Muted Rich Colors */
-        .log-blue { color: var(--log-blue); }
-        .log-purple { color: var(--log-purple); }
-        .log-green { color: var(--log-green); }
-        .log-yellow { color: var(--log-yellow); }
-        .log-gray { color: var(--log-gray); }
+        .log-line { margin-bottom: 6px; border-left: 3px solid #333; padding-left: 12px; line-height: 1.6; }
+        .log-blue { color: var(--log-blue); } .log-green { color: var(--log-green); } 
+        .log-yellow { color: var(--log-yellow); } .log-purple { color: var(--log-purple); } .log-gray { color: var(--log-gray); }
 
-        .progress-line {
-            height: 4px;
-            background: var(--surface-variant);
-            border-radius: 2px;
-            margin: 24px 0;
-            overflow: hidden;
-            display: none;
-        }
-        .progress-fill { height: 100%; width: 0; background: var(--primary); transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .progress-line { height: 4px; background: var(--surface-variant); border-radius: 2px; margin: 24px 0; overflow: hidden; display: none; }
+        .progress-fill { height: 100%; width: 0; background: var(--primary); transition: 0.3s linear; }
 
-        /* Fixed Ripple Algorithm */
-        .ripple {
-            position: absolute;
-            background: rgba(var(--ripple-color, 255, 255, 255), 0.25);
-            border-radius: 50%;
-            transform: scale(0);
-            animation: ripple-anim 0.6s linear;
-            pointer-events: none;
-        }
+        /* 坐标感应水波纹效果 */
+        .ripple { position: absolute; background: rgba(255, 255, 255, 0.35); border-radius: 50%; transform: scale(0); animation: ripple-anim 0.6s cubic-bezier(0, 0, 0.2, 1); pointer-events: none; }
+        [data-theme="light"] .ripple { background: rgba(0, 0, 0, 0.1); }
         @keyframes ripple-anim { to { transform: scale(4); opacity: 0; } }
 
-        .footer { padding: 24px 24px calc(24px + env(safe-area-inset-bottom)) 24px; }
-        .main-btn {
-            width: 100%; height: 56px; border-radius: 28px;
-            background-color: var(--primary); color: var(--on-primary);
-            border: none; font-size: 16px; font-weight: 500; cursor: pointer;
-        }
-        .icon-btn {
-            width: 48px; height: 48px; border-radius: 24px;
-            display: flex; align-items: center; justify-content: center;
-            background: transparent; border: none; color: var(--on-surface); cursor: pointer;
-            position: relative; overflow: visible; /* 为了让水波纹在圆圈内完美显示 */
-        }
+        .footer { padding: 24px 24px calc(24px + env(safe-area-inset-bottom)); }
+        .main-btn { width: 100%; height: 64px; border-radius: 32px; background: var(--primary); color: var(--on-primary); border: none; font-size: 18px; font-weight: 700; cursor: pointer; position: relative; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .icon-btn { width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: var(--on-surface); cursor: pointer; position: relative; overflow: hidden; }
     </style>
 </head>
-<body>
+<body data-theme="light">
 
-<div class="top-app-bar">
-    <button class="icon-btn" onclick="toggleTheme(event)">
-        <span class="material-icons-sharp" id="theme-icon">dark_mode</span>
+<div class="top-bar">
+    <button class="icon-btn" onclick="toggleSettings(true, event)">
+        <span class="material-icons-round">settings</span>
     </button>
 </div>
 
 <div class="app-container">
     <div class="header-section">
-        <i class="material-icons-sharp header-icon">fingerprint</i>
-        <h1 class="title">System Root</h1>
-        <p class="hint-text" id="hint">Select a framework to escalate system privileges.</p>
+        <i class="material-icons-round header-icon">system_update</i>
+        <h1 class="title" id="ui-title">System Root</h1>
+        <p class="hint-text" id="hint">选择您希望的方案，刷写马上开始</p>
     </div>
 
     <div id="ui-selector">
         <div class="selection-list">
-            <div class="list-item selected" onclick="select(this, 'Magisk v27.0')">
-                <i class="material-icons-sharp">auto_awesome</i>
-                <span class="list-item-text">Magisk (Standard)</span>
+            <div class="list-item selected" onclick="selectPlan(this, 'Magisk v27.0', event)">
+                <i class="material-icons-round">auto_awesome</i>
+                <span class="list-item-text">Magisk (Stable)</span>
             </div>
-            <div class="list-item" onclick="select(this, 'KernelSU')">
-                <i class="material-icons-sharp">memory</i>
+            <div class="list-item" onclick="selectPlan(this, 'KernelSU', event)">
+                <i class="material-icons-round">memory</i>
                 <span class="list-item-text">KernelSU (GKI)</span>
             </div>
-            <div class="list-item" onclick="select(this, 'APatch')">
-                <i class="material-icons-sharp">settings_input_component</i>
+            <div class="list-item" onclick="selectPlan(this, 'APatch', event)">
+                <i class="material-icons-round">extension</i>
                 <span class="list-item-text">APatch</span>
             </div>
-            <div class="list-item" onclick="select(this, 'SukiSU Ultra')">
-                <i class="material-icons-sharp">bolt</i>
+            <div class="list-item" onclick="selectPlan(this, 'SukiSU Ultra', event)">
+                <i class="material-icons-round">bolt</i>
                 <span class="list-item-text">SukiSU Ultra</span>
             </div>
         </div>
@@ -210,58 +142,114 @@
 </div>
 
 <div class="footer">
-    <button class="main-btn" id="action-btn" onclick="execute(event)">INITIATE FLASHING</button>
+    <button class="main-btn" id="action-btn" onclick="execute(event)">马上开始！</button>
+</div>
+
+<div class="settings-panel" id="settings-panel">
+    <div class="settings-header">
+        <button class="icon-btn" onclick="toggleSettings(false, event)">
+            <span class="material-icons-round">arrow_back</span>
+        </button>
+        <span id="st-title">设置</span>
+    </div>
+    <div class="settings-content">
+        <div class="setting-group">
+            <div class="setting-row" onclick="changeTheme(event)">
+                <div class="setting-info">
+                    <div class="setting-title" id="st-theme">显示模式</div>
+                    <div class="setting-desc" id="st-theme-desc">切换暗色或亮色主题</div>
+                </div>
+                <span class="material-icons-round" id="theme-icon">dark_mode</span>
+            </div>
+            <div class="setting-row" onclick="changeLang(event)">
+                <div class="setting-info">
+                    <div class="setting-title" id="st-lang">界面语言</div>
+                    <div class="setting-desc" id="st-lang-desc">当前: 简体中文</div>
+                </div>
+                <span class="badge" id="lang-badge">CN</span>
+            </div>
+        </div>
+
+        <div class="setting-group">
+            <div class="setting-row" onclick="window.open('https://github.com/ReChoilles/System-Root-for-Android-bushi-', '_blank'); applyRipple(event)">
+                <div class="setting-info">
+                    <div class="setting-title" id="st-about">项目仓库</div>
+                    <div class="setting-desc">GitHub : System-Root-for-Android-bushi-</div>
+                </div>
+                <span class="material-icons-round">open_in_new</span>
+            </div>
+            <div class="setting-row" onclick="applyRipple(event)">
+                <div class="setting-info">
+                    <div class="setting-title" id="st-ver-title">版本号</div>
+                    <div class="setting-desc">Version 1.00.4 (Stable)</div>
+                </div>
+                <span class="badge" style="opacity:0.8" id="st-stable-tag">稳定版</span>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
-    // 自动检测设备和系统
-    function getDevice() {
-        const ua = navigator.userAgent;
-        let model = "Generic Device";
-        let ver = "14.0";
-        if (/Android/i.test(ua)) {
-            const m = ua.match(/Android\s([0-9\.]+);\s([^;]+)\sBuild/);
-            if (m) { ver = m[1]; model = m[2]; }
-        }
-        return { model, ver };
-    }
+    let currentLang = 'zh';
+    const i18n = {
+        zh: { title: "System Root", hint: "选择您希望的方案，刷写马上开始。", start: "马上开始！", stTitle: "设置", stTheme: "显示模式", stThemeD: "切换暗色或亮色主题", stLang: "界面语言", stLangD: "当前: 简体中文", stAbout: "关于项目", stVer: "版本号", stStable: "稳定版", reboot: "重启设备", finishHint: "设备已Root，重启使用。" },
+        en: { title: "System Root", hint: "Select a plan to start the secure flash.", start: "START FLASHING", stTitle: "Settings", stTheme: "Display Theme", stThemeD: "Toggle dark or light mode", stLang: "UI Language", stLangD: "Current: English", stAbout: "About Project", stVer: "Version", stStable: "Stable", reboot: "REBOOT DEVICE", finishHint: "Sequence completed. System reboot required." }
+    };
 
-    // 通用水波纹（修复图标偏移）
-    function applyRipple(e, isIcon = false) {
-        const btn = e.currentTarget;
+    function applyRipple(e) {
+        const target = e.currentTarget;
         const ripple = document.createElement("span");
-        const rect = btn.getBoundingClientRect();
+        const rect = target.getBoundingClientRect();
         const size = Math.max(rect.width, rect.height);
-        
-        ripple.style.width = ripple.style.height = `${size}px`;
-        
-        if (isIcon) {
-            ripple.style.left = `0px`;
-            ripple.style.top = `0px`;
-        } else {
-            ripple.style.left = `${e.clientX - rect.left - size/2}px`;
-            ripple.style.top = `${e.clientY - rect.top - size/2}px`;
-        }
+        // 基于坐标的扩散计算
+        const x = e.clientX - rect.left - size / 2;
+        const y = e.clientY - rect.top - size / 2;
         
         ripple.className = "ripple";
-        btn.appendChild(ripple);
+        ripple.style.width = ripple.style.height = `${size}px`;
+        ripple.style.left = `${x}px`;
+        ripple.style.top = `${y}px`;
+
+        target.appendChild(ripple);
         setTimeout(() => ripple.remove(), 600);
     }
 
-    function toggleTheme(e) {
-        applyRipple(e, true);
+    function toggleSettings(show, e) {
+        applyRipple(e);
+        const panel = document.getElementById('settings-panel');
+        if (show) { panel.style.display = 'flex'; setTimeout(() => panel.classList.add('show'), 10); }
+        else { panel.classList.remove('show'); setTimeout(() => panel.style.display = 'none', 400); }
+    }
+
+    function changeTheme(e) {
+        applyRipple(e);
         const b = document.body;
         const isDark = b.getAttribute('data-theme') === 'dark';
-        b.setAttribute('data-theme', isDark ? '' : 'dark');
+        b.setAttribute('data-theme', isDark ? 'light' : 'dark');
         document.getElementById('theme-icon').innerText = isDark ? 'dark_mode' : 'light_mode';
     }
 
-    let selectedPlan = "Magisk v27.0";
-    function select(el, name) {
-        // 水波纹效果
-        const mockEvent = { currentTarget: el, clientX: event.clientX, clientY: event.clientY };
-        applyRipple(mockEvent);
+    function changeLang(e) {
+        applyRipple(e);
+        currentLang = currentLang === 'zh' ? 'en' : 'zh';
+        const L = i18n[currentLang];
+        document.getElementById('ui-title').innerText = L.title;
+        document.getElementById('hint').innerText = L.hint;
+        document.getElementById('action-btn').innerText = L.start;
+        document.getElementById('st-title').innerText = L.stTitle;
+        document.getElementById('st-theme').innerText = L.stTheme;
+        document.getElementById('st-theme-desc').innerText = L.stThemeD;
+        document.getElementById('st-lang').innerText = L.stLang;
+        document.getElementById('st-lang-desc').innerText = L.stLangD;
+        document.getElementById('st-about').innerText = L.stAbout;
+        document.getElementById('st-ver-title').innerText = L.stVer;
+        document.getElementById('st-stable-tag').innerText = L.stStable;
+        document.getElementById('lang-badge').innerText = currentLang === 'zh' ? 'CN' : 'EN';
+    }
 
+    let selectedPlan = "Magisk v27.0";
+    function selectPlan(el, name, e) {
+        applyRipple(e);
         document.querySelectorAll('.list-item').forEach(i => i.classList.remove('selected'));
         el.classList.add('selected');
         selectedPlan = name;
@@ -271,51 +259,45 @@
         applyRipple(e);
         const btn = document.getElementById('action-btn');
         const logWin = document.getElementById('log-window');
-        const pBox = document.getElementById('p-box');
         const pBar = document.getElementById('p-bar');
         const hint = document.getElementById('hint');
-        const device = getDevice();
-
+        
         document.getElementById('ui-selector').style.display = 'none';
         logWin.style.display = 'block';
-        pBox.style.display = 'block';
-        btn.disabled = true;
-        btn.style.opacity = '0.5';
+        document.getElementById('p-box').style.display = 'block';
+        btn.disabled = true; btn.style.opacity = '0.5';
 
-        const sequence = [
-            { t: `[INIT] Handshaking with device...`, c: "log-gray", d: 800, h: "Checking hardware state..." },
-            { t: `[SYSTEM] Model: ${device.model}`, c: "log-blue", d: 500 },
-            { t: `[SYSTEM] OS Version: Android ${device.ver}`, c: "log-blue", d: 400 },
-            { t: `[CORE] Downloading ${selectedPlan} components...`, d: 2000, h: "Synchronizing remote assets..." },
-            { t: "[SECURITY] Integrity check: SHA-256 verified", c: "log-green", d: 800 },
-            { t: "[WARN] Verifying Bootloader partition...", c: "log-yellow", d: 1200, h: "Authenticating signatures..." },
-            { t: "[EXEC] Exploiting BL security layer...", d: 6000, h: "Unlocking Bootloader (Critical Stage)..." },
-            { t: "[SUCCESS] Security layer bypassed", c: "log-green", d: 1000 },
-            { t: "[IMG] Reading boot partition to memory...", c: "log-purple", d: 2200, h: "Extracting kernel image..." },
-            { t: "[PATCH] Injecting SU-Daemon & Init-Hooks...", c: "log-purple", d: 3500, h: "Applying system-less patches..." },
-            { t: "[FLASH] Re-writing Partition A (boot_a)...", d: 4500, h: "Writing modified partitions..." },
-            { t: "[FLASH] Re-writing Partition B (boot_b)...", d: 4200 },
-            { t: "[DONE] Clearning temporary mount points...", c: "log-gray", d: 1500, h: "Finalizing..." },
-            { t: `[FINISHED] ${selectedPlan} is now active.`, c: "log-green", d: 500 }
+        // 重新应用彩色日志逻辑
+        const logs = [
+            { t: `[INIT] Handshaking with secure kernel...`, c: "log-gray", d: 800, h: currentLang==='zh'?"建立安全握手...":"Establishing link..." },
+            { t: `[INFO] Env Detect: Android 14.0 (ARM64)`, c: "log-blue", d: 600 },
+            { t: `[CORE] Downloading ${selectedPlan} payloads...`, d: 1500, h: currentLang==='zh'?"下载引导载荷...":"Downloading payloads..." },
+            { t: "[WARN] Verifying SecureBoot AVB signature...", c: "log-yellow", d: 1000 },
+            { t: "[EXEC] Exploiting BL security layer...", d: 6000, h: currentLang==='zh'?"解锁 Bootloader...":"Unlocking BL..." },
+            { t: "[SUCCESS] Security layer bypassed.", c: "log-green", d: 1200 },
+            { t: "[IMG] Reading boot partition to memory...", c: "log-purple", d: 1800, h: currentLang==='zh'?"提取分区镜像...":"Extracting image..." },
+            { t: "[PATCH] Injecting system-less hooks...", c: "log-blue", d: 3500, h: currentLang==='zh'?"注入系统补丁...":"Injecting patches..." },
+            { t: "[FLASH] Writing Partition A (boot_a)...", d: 4500, h: currentLang==='zh'?"正在写入镜像...":"Writing image..." },
+            { t: "[FLASH] Writing Partition B (boot_b)...", d: 4200 },
+            { t: "[CLEAN] Rebuilding filesystem context...", c: "log-gray", d: 1500, h: currentLang==='zh'?"收尾工作中...":"Finalizing..." },
+            { t: `[DONE] ${selectedPlan} sequence completed!`, c: "log-green", d: 500 }
         ];
 
-        for (let i = 0; i < sequence.length; i++) {
-            const step = sequence[i];
+        for (let i = 0; i < logs.length; i++) {
+            const step = logs[i];
             if (step.h) hint.innerText = step.h;
-
             const line = document.createElement('div');
             line.className = `log-line ${step.c || ''}`;
             line.innerText = `>> ${step.t}`;
             logWin.appendChild(line);
             logWin.scrollTop = logWin.scrollHeight;
-
-            pBar.style.width = `${((i + 1) / sequence.length) * 100}%`;
-            await new Promise(r => setTimeout(r, step.d + (Math.random() * 300)));
+            pBar.style.width = `${((i + 1) / logs.length) * 100}%`;
+            await new Promise(r => setTimeout(r, step.d));
         }
 
-        hint.innerText = "Elevation complete. System reboot required.";
+        hint.innerText = i18n[currentLang].finishHint;
         btn.disabled = false; btn.style.opacity = '1';
-        btn.innerText = "REBOOT DEVICE";
+        btn.innerText = i18n[currentLang].reboot;
         btn.onclick = () => location.reload();
     }
 </script>
